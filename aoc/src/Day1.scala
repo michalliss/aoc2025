@@ -15,13 +15,13 @@ object Day1 {
 
   case class Rotation(direction: Direction, steps: Int)
 
-  case class RotationResult(newDial: Dial, crossedZeroCount: Int)
+  case class RotationResult(dial: Dial, crossedZeroCount: Int)
 
   case class Dial private (position: Int):
-    def rotate(rotation: Rotation): Dial =
-      rotateDetailed(rotation).newDial
+    def rotateSimple(rotation: Rotation): Dial =
+      rotate(rotation).dial
 
-    def rotateDetailed(rotation: Rotation): RotationResult =
+    def rotate(rotation: Rotation): RotationResult =
       val newRawPosition = rotation.direction match
         case Direction.L => (position - rotation.steps)
         case Direction.R => (position + rotation.steps)
@@ -65,7 +65,7 @@ object Day1 {
                .map(parsing.parseRotation)
                .some
                .runFold((zeroCount = 0, dial = Dial.initial)) { case ((zeroCount, dial), rotation) =>
-                 val newDial      = dial.rotate(rotation)
+                 val newDial      = dial.rotateSimple(rotation)
                  val newZeroCount = if (newDial.position == 0) zeroCount + 1 else zeroCount
                  (newZeroCount, newDial)
                }
@@ -79,9 +79,9 @@ object Day1 {
                .map(parsing.parseRotation)
                .some
                .runFold((zeroCount = 0, dial = Dial.initial)) { case ((zeroCount, dial), rotation) =>
-                 val rotationResult = dial.rotateDetailed(rotation)
+                 val rotationResult = dial.rotate(rotation)
                  val newZeroCount   = zeroCount + rotationResult.crossedZeroCount
-                 (newZeroCount, rotationResult.newDial)
+                 (newZeroCount, rotationResult.dial)
                }
     } yield res.zeroCount
 
