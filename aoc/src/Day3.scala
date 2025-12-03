@@ -18,17 +18,19 @@ object Day3 {
     def maxIndexLeavingSpaceOnRight(space: Int): Index =
       Index(bank.zipWithIndex.dropRight(space).maxBy(_._1.joltage)._2)
 
-    def maxJoltage(batteriesCount: Int): Joltage = {
+    def joltage = bank.map(_.joltage).mkString.toLong
+
+    def subsetJoltage(batteriesCount: Int): Joltage = {
       @tailrec
-      def helper(result: List[Joltage], remaining: Bank): List[Joltage] =
+      def helper(result: List[Battery], remaining: Bank): List[Battery] =
         if result.size == batteriesCount then result
         else {
           val spaceNeeded = batteriesCount - result.size - 1
           val index       = remaining.maxIndexLeavingSpaceOnRight(spaceNeeded).value
-          helper(result :+ remaining(index).joltage, remaining.drop(index + 1))
+          helper(result :+ remaining(index), remaining.drop(index + 1))
         }
 
-      helper(Nil, bank).mkString.toLong
+      helper(Nil, bank).joltage
     }
 
   object parsing {
@@ -47,7 +49,7 @@ object Day3 {
                .via(ZPipeline.splitLines)
                .map(line => parsing.parseBank(line))
                .some
-               .map(_.maxJoltage(2))
+               .map(_.subsetJoltage(2))
                .runSum
     } yield res
 
@@ -58,7 +60,7 @@ object Day3 {
                .via(ZPipeline.splitLines)
                .map(line => parsing.parseBank(line))
                .some
-               .map(_.maxJoltage(12))
+               .map(_.subsetJoltage(12))
                .runSum
     } yield res
 }
